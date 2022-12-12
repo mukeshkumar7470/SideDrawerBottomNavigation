@@ -2,6 +2,7 @@ package com.mukesh.sidedrawerbottomnavigation
 
 import android.os.Bundle
 import android.view.View
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
@@ -11,6 +12,7 @@ import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.NavigationUI
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.mukesh.sidedrawerbottomnavigation.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
@@ -85,7 +87,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun exitApp() { //To exit the application call this function from fragment
-        this.finishAffinity()
+        showAppClosingDialog()
     }
 
     override fun onSupportNavigateUp(): Boolean { //Setup appBarConfiguration for back arrow
@@ -97,9 +99,35 @@ class MainActivity : AppCompatActivity() {
             binding.mainDrawerLayout.isDrawerOpen(GravityCompat.START) -> {
                 binding.mainDrawerLayout.closeDrawer(GravityCompat.START)
             }
-            else -> {
-                super.onBackPressed() //If drawer is already in closed condition then go back
+            else -> { //If drawer is already in closed condition then go back
+                // onBackPressedDispatcher.addCallback(this, onBackPressedCallback)
+                // super.onBackPressed()
+
+                when (navController.currentDestination?.id) {
+                    R.id.homeFragment -> {
+                        showAppClosingDialog()
+                    }
+                    else -> {
+                        navController.popBackStack()
+                    }
+                }
             }
         }
     }
+
+    private fun showAppClosingDialog() {
+        MaterialAlertDialogBuilder(this)
+            .setTitle("Warning")
+            .setMessage("Do you really want to close the app?")
+            .setPositiveButton("Yes") { _, _ -> this.finishAffinity() }
+            .setNegativeButton("No", null)
+            .show()
+    }
+
+    private val onBackPressedCallback: OnBackPressedCallback =
+        object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                showAppClosingDialog()
+            }
+        }
 }
